@@ -1,0 +1,275 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1" />
+<title>flowsignal - Lucky Get</title>
+<style>
+  @import url('https://fonts.googleapis.com/css2?family=Orbitron:wght@700&display=swap');
+  body {
+    margin: 0; padding: 0;
+    font-family: 'Orbitron', sans-serif;
+    background: linear-gradient(135deg, #1a0033, #000066);
+    color: #aaaaff;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    height: 100vh;
+  }
+  .container {
+    width: 350px;
+    background: #0b0033;
+    border-radius: 15px;
+    padding: 20px;
+    box-shadow: 0 0 30px #6655ff99;
+    text-align: center;
+    user-select: none;
+  }
+  h1 {
+    margin: 0 0 5px;
+    font-size: 2rem;
+    color: #bbbaff;
+  }
+  .info-bar {
+    display: flex;
+    justify-content: space-between;
+    font-size: 1rem;
+    margin-bottom: 10px;
+    color: #8888ff;
+  }
+  #time {
+    font-weight: 700;
+  }
+  .coef-label {
+    font-size: 1rem;
+    color: #aaaaff;
+    margin-bottom: 5px;
+  }
+  #coefSignal {
+    font-size: 2rem;
+    font-weight: 700;
+    color: #ffccff;
+    text-shadow: 0 0 10px #ccbbff;
+    margin-bottom: 10px;
+  }
+  #coefCurrent {
+    font-size: 2.5rem;
+    font-weight: 700;
+    color: #ffffff;
+    text-shadow: 0 0 10px #ccccff;
+    margin-bottom: 10px;
+  }
+  .rocket-box {
+    position: relative;
+    width: 100%;
+    height: 220px;
+    background: linear-gradient(to top, #110022, #1a0033);
+    border: 2px solid #444499;
+    border-radius: 15px;
+    overflow: hidden;
+    margin-bottom: 15px;
+  }
+  .rocket {
+    position: absolute;
+    bottom: 0;
+    left: 50%;
+    width: 40px;
+    height: 80px;
+    background: #8855ff;
+    border-radius: 50% 50% 10% 10%;
+    transform: translateX(-50%);
+    box-shadow: 0 0 15px #aa88ff;
+    transition: bottom 0.1s linear;
+  }
+  .flame {
+    position: absolute;
+    bottom: -20px;
+    left: 50%;
+    width: 30px;
+    height: 60px;
+    background: radial-gradient(circle, #ffcc66 20%, #ff3300 80%);
+    transform: translateX(-50%);
+    filter: blur(2px);
+    animation: flameFlicker 0.3s infinite alternate;
+  }
+  @keyframes flameFlicker {
+    0% {opacity: 0.7;}
+    100% {opacity: 1;}
+  }
+  .explosion {
+    position: absolute;
+    bottom: 20px;
+    left: 50%;
+    width: 120px;
+    height: 120px;
+    background: radial-gradient(circle, #ff99ff 0%, transparent 70%);
+    border-radius: 50%;
+    transform: translateX(-50%) scale(0);
+    pointer-events: none;
+    animation: explodeAnim 0.6s forwards;
+    filter: drop-shadow(0 0 10px #ff99ff);
+  }
+  @keyframes explodeAnim {
+    0% {transform: translateX(-50%) scale(0); opacity: 1;}
+    100% {transform: translateX(-50%) scale(1.5); opacity: 0;}
+  }
+  button {
+    width: 120px;
+    padding: 10px;
+    font-size: 1.2rem;
+    font-weight: 700;
+    color: #dddfff;
+    background: linear-gradient(45deg, #6a4fff, #8a6aff);
+    border: none;
+    border-radius: 12px;
+    cursor: pointer;
+    box-shadow: 0 0 10px #7766ff;
+    transition: background 0.3s ease;
+    user-select: none;
+  }
+  button:disabled {
+    background: #444466;
+    cursor: default;
+    box-shadow: none;
+  }
+  @media (max-width: 400px) {
+    .container {
+      width: 90vw;
+    }
+    #coefSignal, #coefCurrent {
+      font-size: 2rem;
+    }
+    .rocket-box {
+      height: 180px;
+    }
+    .rocket {
+      width: 30px;
+      height: 60px;
+    }
+  }
+</style>
+</head>
+<body>
+
+  <a href="index.html" style="
+    position: fixed;
+    top: 10px;
+    left: 10px;
+    padding: 10px 20px;
+    font-size: 1rem;
+    border-radius: 10px;
+    cursor: pointer;
+    z-index: 1000;
+    background: linear-gradient(135deg, #6a4fff, #8a6aff);
+    color: white;
+    border: none;
+    box-shadow: 0 0 10px #aa88ff;
+    text-decoration: none;
+    font-weight: bold;
+  ">← Назад</a>
+
+  <div class="container">
+    <h1>flowsignal - Lucky Get</h1>
+    <div class="info-bar">
+      <div>Сигнал</div>
+      <div id="time">--:--:--</div>
+    </div>
+    <div class="coef-label">Сигнальный коэффициент:</div>
+    <div id="coefSignal">1.00x</div>
+
+    <div class="rocket-box" aria-label="Ракета">
+      <div class="rocket" id="rocket"></div>
+      <div class="flame" id="flame"></div>
+    </div>
+
+    <div class="coef-label">Текущий коэффициент:</div>
+    <div id="coefCurrent">1.00x</div>
+
+    <button id="playBtn">Играть</button>
+  </div>
+
+<script>
+  const coefSignal = document.getElementById('coefSignal');
+  const coefCurrent = document.getElementById('coefCurrent');
+  const playBtn = document.getElementById('playBtn');
+  const rocket = document.getElementById('rocket');
+  const flame = document.getElementById('flame');
+  const timeDisplay = document.getElementById('time');
+
+  let animationId = null;
+  let startTime = null;
+  let duration = 13000; // Время примерно 13 секунд до коэффициента ~2.88
+  let maxCoef = 35;
+  let targetCoef = 1;
+
+  function updateTime() {
+    const now = new Date();
+    timeDisplay.textContent = now.toLocaleTimeString('ru-RU');
+  }
+  setInterval(updateTime, 1000);
+  updateTime();
+
+  function generateCoef() {
+    const r = Math.random();
+    if (r < 0.5) return +(1 + Math.random() * 2).toFixed(2);          // 1.00 - 3.00
+    else if (r < 0.8) return +(3 + Math.random() * 2).toFixed(2);      // 3.00 - 5.00
+    else if (r < 0.95) return +(5 + Math.random() * 12).toFixed(2);    // 5.00 - 17.00
+    else return +(17 + Math.random() * (maxCoef - 17)).toFixed(2);     // 17.00 - 35.00
+  }
+
+  // Новая функция расчёта коэффициента с плавным замедлением роста по времени
+  // Используем квадратичную кривую роста: в начале быстро, затем замедляется
+  // progress — от 0 до 1 (процент времени)
+  function calcCoef(progress, target) {
+    // Здесь прогресс меняется не линейно, а по формуле:
+    // Например: коэффициент = 1 + (target - 1) * (1 - (1-progress)^2)
+    // При progress=0 -> coef=1
+    // При progress=1 -> coef=target
+    // Замедление происходит ближе к target
+    return 1 + (target - 1) * (1 - Math.pow(1 - progress, 2));
+  }
+
+  function animateRocket(timestamp) {
+    if (!startTime) startTime = timestamp;
+    const elapsed = timestamp - startTime;
+    let progress = Math.min(elapsed / duration, 1);
+
+    const coef = calcCoef(progress, targetCoef);
+    rocket.style.bottom = (progress * 100) + '%';
+    coefCurrent.textContent = coef.toFixed(2) + 'x';
+
+    if (coef >= targetCoef) {
+      explosion();
+      return;
+    }
+
+    animationId = requestAnimationFrame(animateRocket);
+  }
+
+  function explosion() {
+    flame.style.display = 'none';
+    const exp = document.createElement('div');
+    exp.className = 'explosion';
+    document.querySelector('.rocket-box').appendChild(exp);
+    setTimeout(() => {
+      exp.remove();
+      rocket.style.bottom = '0%';
+      flame.style.display = 'block';
+      coefCurrent.textContent = '1.00x';
+      playBtn.disabled = false;
+    }, 600);
+  }
+
+  playBtn.addEventListener('click', () => {
+    playBtn.disabled = true;
+    startTime = null;
+    targetCoef = generateCoef();
+    coefSignal.textContent = targetCoef.toFixed(2) + 'x';
+    coefCurrent.textContent = '1.00x';
+    rocket.style.bottom = '0%';
+    flame.style.display = 'block';
+    animationId = requestAnimationFrame(animateRocket);
+  });
+</script>
+</body>
+</html>

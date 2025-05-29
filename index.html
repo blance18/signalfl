@@ -1,0 +1,91 @@
+
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>Выбор игры | flowsignal</title>
+  <style>
+    body {
+      background: #0a0a0a;
+      color: white;
+      font-family: 'Arial Black', Arial, sans-serif;
+      text-align: center;
+      padding: 20px;
+    }
+    h1 {
+      margin-bottom: 10px;
+      font-size: 2.5rem;
+      color: #00f2fe;
+      text-shadow: 0 0 10px #00f2fe;
+    }
+    .time {
+      color: #facc15;
+      font-weight: bold;
+      margin-bottom: 20px;
+      text-shadow: 0 0 6px #facc15;
+    }
+    .games {
+      display: flex;
+      justify-content: center;
+      gap: 30px;
+      flex-wrap: wrap;
+    }
+    .game {
+      background: #111;
+      border-radius: 20px;
+      padding: 20px;
+      width: 200px;
+      box-shadow: 0 0 10px #222;
+      user-select: none;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+    }
+    .game-title {
+      font-weight: 900;
+      margin-bottom: 15px;
+      font-size: 20px;
+    }
+    button {
+      background: linear-gradient(145deg, #6a4fff, #8a6aff);
+      border: none;
+      padding: 10px 20px;
+      border-radius: 12px;
+      font-weight: 900;
+      font-size: 16px;
+      color: white;
+      cursor: pointer;
+      box-shadow: 0 0 10px #aa88ff;
+      transition: background 0.3s ease;
+      width: 100%;
+    }
+    button:hover {
+      background: linear-gradient(145deg, #8a6aff, #6a4fff);
+    }
+    @media (max-width: 500px) {
+      .games {
+        flex-direction: column;
+        align-items: center;
+      }
+      .game {
+        width: 90%;
+      }
+    }
+  </style>
+</head>
+<body>
+  <h1>flowsignal</h1>
+  <div class="time">Текущее время: 14:03</div>
+  <div class="games">
+    <div class="game">
+      <div class="game-title">MINES</div>
+      <button onclick="window.location.href='Index(3).html'">ОТКРЫТЬ</button>
+    </div>
+    <div class="game">
+      <div class="game-title">LUCKY GET</div>
+      <button onclick="window.location.href='Index(2).html'">ОТКРЫТЬ</button>
+    </div>
+  </div>
+</body>
+</html>

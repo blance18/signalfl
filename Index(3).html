@@ -1,0 +1,354 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>flowsignal Mines</title>
+  <style>
+    @import url('https://fonts.googleapis.com/css2?family=Montserrat:wght@600&display=swap');
+
+    /* Анимация звезд мерцание и плавное появление */
+    @keyframes starPulse {
+      0%, 100% {opacity: 0.6; transform: scale(1);}
+      50% {opacity: 1; transform: scale(1.15);}
+    }
+
+    @keyframes starPop {
+      0% { transform: scale(0); opacity: 0; }
+      100% { transform: scale(1); opacity: 1; }
+    }
+
+    /* Фоновая анимация случайных мелких звезд */
+    @keyframes twinkle {
+      0%, 100% {opacity: 0.3;}
+      50% {opacity: 1;}
+    }
+
+    body {
+      margin: 0;
+      font-family: 'Montserrat', sans-serif;
+      background: radial-gradient(circle at center, #0b1426 0%, #091025 80%);
+      color: #e0e7ff;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      min-height: 100vh;
+      overflow: hidden;
+      user-select: none;
+      position: relative;
+    }
+
+    /* Мелкие звезды фона */
+    .background-star {
+      position: absolute;
+      background: radial-gradient(circle, #63b3ed 0%, transparent 80%);
+      border-radius: 50%;
+      opacity: 0.3;
+      animation-name: twinkle;
+      animation-iteration-count: infinite;
+      animation-timing-function: ease-in-out;
+    }
+
+    /* Создаем несколько случайных звезд на фоне */
+    /* JS добавит их динамически */
+
+    h1 {
+      margin-top: 1rem;
+      font-size: 2.8rem;
+      color: #3b82f6;
+      text-shadow: 0 0 10px #3b82f6;
+      z-index: 10;
+    }
+
+    #time, #actual {
+      font-weight: 600;
+      margin: 2px 0;
+      color: #facc15;
+      text-shadow: 0 0 6px #facc15;
+      z-index: 10;
+    }
+
+    #grid {
+      margin-top: 2rem;
+      display: grid;
+      grid-template-columns: repeat(5, 60px);
+      gap: 10px;
+      z-index: 10;
+      min-height: 310px;
+    }
+
+    .cell {
+      width: 60px;
+      height: 60px;
+      background: #1e293b;
+      border-radius: 12px;
+      box-shadow:
+        inset 0 0 8px #3b82f6,
+        0 4px 8px rgba(0,0,0,0.7);
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      font-size: 1.6rem;
+      color: #e0e7ff;
+      user-select: none;
+      cursor: default;
+      transition: background-color 0.3s ease;
+    }
+
+    .cell.star {
+      background: #facc15;
+      color: #1e293b;
+      animation: starPop 0.4s ease forwards, starPulse 2s ease-in-out infinite;
+      box-shadow:
+        0 0 10px #facc15,
+        0 0 20px #facc15;
+      cursor: default;
+    }
+
+    .controls-wrapper {
+      width: 100%;
+      max-width: 360px;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      margin-top: auto;
+      margin-bottom: 30px;
+      z-index: 10;
+    }
+
+    .controls {
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      gap: 15px;
+      margin-bottom: 10px;
+    }
+
+    .arrow-btn, .play-btn {
+      background: #2563eb;
+      border: none;
+      border-radius: 12px;
+      color: white;
+      font-weight: 600;
+      font-size: 1.2rem;
+      padding: 12px 24px;
+      cursor: pointer;
+      user-select: none;
+      box-shadow:
+        0 0 8px #3b82f6;
+      transition: background-color 0.3s ease, box-shadow 0.3s ease;
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      min-width: 70px;
+      height: 44px;
+    }
+
+    .arrow-btn:hover {
+      background: #3b82f6;
+      box-shadow:
+        0 0 12px #60a5fa;
+    }
+
+    .play-btn {
+      background: #22c55e;
+      min-width: 160px;
+      box-shadow:
+        0 0 10px #22c55e;
+      font-size: 1.3rem;
+    }
+
+    .play-btn:hover {
+      background: #16a34a;
+      box-shadow:
+        0 0 15px #16a34a;
+    }
+
+    #bombDisplay {
+      font-size: 1.3rem;
+      font-weight: 700;
+      min-width: 110px;
+      text-align: center;
+      color: #e0e7ff;
+      user-select: none;
+      text-shadow: 0 0 6px #2563eb;
+    }
+
+  </style>
+</head>
+<body>
+  <a href="index.html" style="
+    position: fixed;
+    top: 10px;
+    left: 10px;
+    padding: 10px 20px;
+    font-size: 1rem;
+    border-radius: 10px;
+    cursor: pointer;
+    z-index: 1000;
+    background: linear-gradient(135deg, #6a4fff, #8a6aff);
+    color: white;
+    border: none;
+    box-shadow: 0 0 10px #aa88ff;
+    text-decoration: none;
+    font-weight: bold;
+  ">← Назад</a>
+  <div style="margin-top: 60px;">
+
+  <a href="index.html" style="
+    position: fixed;
+    top: 10px;
+    left: 10px;
+    padding: 10px 20px;
+    font-size: 1rem;
+    border-radius: 10px;
+    cursor: pointer;
+    z-index: 1000;
+    background: linear-gradient(135deg, #6a4fff, #8a6aff);
+    color: white;
+    border: none;
+    box-shadow: 0 0 10px #aa88ff;
+    text-decoration: none;
+    font-weight: bold;
+  ">← Назад</a>
+
+  <h1 style="margin-top: 0;">flowsignal</h1>
+  <div id="time"></div>
+  <div id="actual"></div>
+
+  <div id="grid"></div>
+
+  <div class="controls-wrapper">
+    <div class="controls">
+      <button class="arrow-btn" id="prevBombBtn" aria-label="Предыдущие бомбы">⟨</button>
+      <div id="bombDisplay" aria-live="polite" aria-atomic="true">1 бомба</div>
+      <button class="arrow-btn" id="nextBombBtn" aria-label="Следующие бомбы">⟩</button>
+    </div>
+    <button class="play-btn" id="playBtn">Играть</button>
+  </div>
+
+  <!-- Звуки -->
+  <audio id="starSound" src="https://cdn.pixabay.com/download/audio/2021/09/20/audio_8241e4b17e.mp3?filename=soft-click-14449.mp3" preload="auto"></audio>
+  <audio id="clickSound" src="https://cdn.pixabay.com/download/audio/2021/09/20/audio_7127db91d9.mp3?filename=soft-button-press-14509.mp3" preload="auto"></audio>
+  <audio id="relaxSound" src="https://cdn.pixabay.com/download/audio/2022/03/26/audio_633c15e562.mp3?filename=soft-chimes-6251.mp3" preload="auto" loop></audio>
+
+<script>
+  const bombOptions = [1, 3, 5, 7];
+  const starsRange = {
+    1: [4, 6],
+    3: [3, 5],
+    5: [3, 4],
+    7: [1, 3]
+  };
+  let bombIndex = 0;
+
+  const grid = document.getElementById('grid');
+  const bombDisplay = document.getElementById('bombDisplay');
+  const starSound = document.getElementById('starSound');
+  const clickSound = document.getElementById('clickSound');
+  const relaxSound = document.getElementById('relaxSound');
+
+  function updateTime() {
+    const now = new Date();
+    // UTC+3 for MSK
+    now.setHours(now.getUTCHours() + 3);
+    const timeStr = now.toLocaleTimeString('ru-RU', { hour: '2-digit', minute: '2-digit', second: '2-digit' });
+    const dateStr = now.toLocaleDateString('ru-RU');
+    document.getElementById('time').textContent = timeStr;
+    document.getElementById('actual').textContent = `Актуальные сигналы на ${dateStr} ${timeStr}`;
+  }
+
+  setInterval(updateTime, 1000);
+  updateTime();
+
+  function updateDisplay() {
+    const bombs = bombOptions[bombIndex];
+    bombDisplay.textContent = `${bombs} ${bombs === 1 ? 'бомба' : 'бомб'}`;
+  }
+
+  document.getElementById('prevBombBtn').onclick = () => {
+    bombIndex = (bombIndex - 1 + bombOptions.length) % bombOptions.length;
+    updateDisplay();
+    clickSound.play();
+  };
+
+  document.getElementById('nextBombBtn').onclick = () => {
+    bombIndex = (bombIndex + 1) % bombOptions.length;
+    updateDisplay();
+    clickSound.play();
+  };
+
+  function clearGrid() {
+    grid.innerHTML = '';
+  }
+
+  function createCell() {
+    const cell = document.createElement('div');
+    cell.classList.add('cell');
+    return cell;
+  }
+
+  function createStars(starCount) {
+    const starPositions = [];
+    while(starPositions.length < starCount) {
+      const pos = Math.floor(Math.random() * 25);
+      if(!starPositions.includes(pos)) {
+        starPositions.push(pos);
+      }
+    }
+    starPositions.sort((a,b) => a-b);
+    return starPositions;
+  }
+
+  function playGame() {
+    clearGrid();
+    const bombs = bombOptions[bombIndex];
+    const [minStars, maxStars] = starsRange[bombs];
+    const starCount = Math.floor(Math.random() * (maxStars - minStars + 1)) + minStars;
+
+    const stars = createStars(starCount);
+
+    for(let i = 0; i < 25; i++) {
+      const cell = createCell();
+      if(stars.includes(i)) {
+        // Задержка появления звездочек для анимации
+        setTimeout(() => {
+          cell.classList.add('star');
+          cell.textContent = '⭐';
+          starSound.currentTime = 0;
+          starSound.play();
+        }, 150 + i * 60);
+      }
+      grid.appendChild(cell);
+    }
+    updateTime();
+    relaxSound.play();
+  }
+
+  document.getElementById('playBtn').onclick = () => {
+    playGame();
+    clickSound.play();
+  };
+
+  updateDisplay();
+
+  // Добавим на фон анимированные звезды
+  function createBackgroundStars() {
+    const starCount = 40;
+    for(let i=0; i<starCount; i++) {
+      const star = document.createElement('div');
+      star.classList.add('background-star');
+      star.style.width = star.style.height = `${Math.random()*2 + 1}px`;
+      star.style.top = `${Math.random()*100}%`;
+      star.style.left = `${Math.random()*100}%`;
+      star.style.animationDuration = `${3 + Math.random()*3}s`;
+      star.style.animationDelay = `${Math.random()*5}s`;
+      document.body.appendChild(star);
+    }
+  }
+
+  createBackgroundStars();
+
+</script>
+</div></body>
+</html>
